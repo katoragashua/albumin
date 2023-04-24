@@ -1,6 +1,6 @@
-const attachCookies = (res, userToken, refreshToken) => {
+const attachCookies = (res, accessToken, refreshToken) => {
   const expiration = 1000 * 60 * 30;
-  res.cookies("accessToken", userToken, {
+  res.cookie("accessToken", accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     signed: true,
@@ -9,7 +9,7 @@ const attachCookies = (res, userToken, refreshToken) => {
 
   const oneDay = 1000 * 60 * 60 * 24;
 
-  res.cookies("refreshToken", refreshToken, {
+  res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     signed: true,
@@ -17,4 +17,4 @@ const attachCookies = (res, userToken, refreshToken) => {
   });
 };
 
-module.exports = attachCookies
+module.exports = attachCookies;

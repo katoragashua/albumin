@@ -53,8 +53,8 @@ const registerUser = async (req, res) => {
   });
 };
 
-const login = async (req, res) => {
-  const { email, password } = req.bod;
+const loginUser = async (req, res) => {
+  const { email, password } = req.body;
   // Check if the email address and password have been provided
 
   if (!email || !password) {
@@ -75,22 +75,33 @@ const login = async (req, res) => {
   await comparePasswords(password, user.password);
   const tokenUser = utilFuncs.createUserObj(user);
 
-  //   let refreshToken = "";
-  //   // check if user has existing token in db/ This helps so we don't have to create multiple tokens for one user
-  //   const existingToken = await Token.findOne({ user: user._id });
-  //   if (existingToken) {
-  //     const { isValid } = existingToken;
-  //     if (!isValid) {
-  //       throw new CustomError.UnauthenticatedError("Invalid credentials");
-  //     }
-  //     refreshToken = existingToken.refreshToken;
-  //   }
-  const refreshToken = crypto.randomBytes(40).toString("hex");
+  let refreshToken = "";
+  // check if user has existing token in db/ This helps so we don't have to create multiple tokens for one user
+  const existingToken = await Token.findOne({ user: user._id });
+  if (existingToken) {
+    const { isValid } = existingToken;
+    if (!isValid) {
+      throw new CustomError.UnauthenticatedError("Invalid credentials");
+    }
+    refreshToken = existingToken.refreshToken;
+    const accessTokenJWT = await utilFuncs.createJWT({ tokenUser });
+    const refreshTokenJWT = await utilFuncs.createJWT({
+      tokenUser,
+      refreshToken,
+    });
+
+    utilFuncs.attachCookies(res, accessTokenJWT, refreshTokenJWT);
+    res.status(StatusCodes.OK).json({ user, msg: "Successfully logged in." });
+    return;
+  }
+  //
+  refreshToken = crypto.randomBytes(40).toString("hex");
   const ip = req.ip;
   const userAgent = req.get("user-agent");
+
   // Create and an object to model the token schema
   const tokenObj = { refreshToken, ip, userAgent, user: user._id };
-
+  // Create token
   await Token.create(tokenObj);
   const accessTokenJWT = await utilFuncs.createJWT({ tokenUser });
   const refreshTokenJWT = await utilFuncs.createJWT({
@@ -98,19 +109,19 @@ const login = async (req, res) => {
     refreshToken,
   });
 
-  attachCookies(res, accessTokenJWT, refreshTokenJWT);
+  utilFuncs.attachCookies(res, accessTokenJWT, refreshTokenJWT);
   res.status(StatusCodes.OK).json({ user, msg: "Successfully logged in." });
 };
 
-const verifyAccount = async (req, res) => {
-  const { verificationToken, email } = req.body;
+const verifyEmail = async (req, res) => {
+  const { token, email } = req.body;
   // Check for user
   const user = await User.findOne({ email: email });
   if (!user) {
     throw new CustomError.NotFoundError("User not found");
   }
   // Check if verificationToken equals the user's verificationToken'
-  if (user.verificationToken !== verificationToken) {
+  if (user.verificationToken !== token) {
     throw new CustomError.UnauthenticatedError("Verification failed");
   }
 
@@ -123,7 +134,62 @@ const verifyAccount = async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: "User verified", user });
 };
 
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    throw new CustomError.BadRequestError("Please provide email");
+  }
+  const user = await User.findOne({ email });
+  const origin = "http://localhost:5000";
+  if (user) {
+    const passwordToken = crypto.randomBytes(40).toString("hex");
+
+    await utilFuncs.sendResetEmail({
+      name: user.name,
+      email: user.email,
+      passwordToken,
+      origin,
+    });
+
+    const oneHour = 1000 * 60 * 60;
+    const passwordTokenExpiration = new Date(Date.now() + oneHour);
+    user.passwordToken = passwordToken;
+    user.passwordTokenExpiration = passwordTokenExpiration;
+    await user.save();
+  }
+
+  res.status(StatusCodes.OK).json({ msg: "Success! Reset your password." });
+};
+
+const resetPassword = async (req, res) => {
+  const { token, email, password } = req.body;
+  if (!token || !email || !password) {
+    throw new CustomError.BadRequestError("Please provide all values");
+  }
+  const user = await User.findOne({ email });
+  if (user) {
+    const currentDate = new Date();
+    if (
+      !(user.passwordTokenExpiration > currentDate) ||
+      !(user.passwordToken === token)
+    ) {
+      throw new CustomError.UnauthenticatedError("Invalid or expired token");
+    }
+    user.password = password;
+    user.passwordToken = null;
+    user.passwordTokenExpiration = null;
+    await user.save();
+  }
+
+  res
+    .status(StatusCodes.OK)
+    .json({ msg: "Successfully changed password.", user });
+};
+
 module.exports = {
   registerUser,
-  login,
+  loginUser,
+  verifyEmail,
+  forgotPassword,
+  resetPassword,
 };

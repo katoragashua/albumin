@@ -9,11 +9,11 @@ const createUserObj = (user) => {
     name: user.name,
     email: user.email,
     userId: user._id,
-    role: user.role
+    role: user.role,
   };
 };
 
-const verifyJWT = (token) => jwt.verify(token, process.env.JWT_SECRET);
+const verifyJWT = async (token) => jwt.verify(token, process.env.JWT_SECRET);
 
 module.exports = {
   createJWT,

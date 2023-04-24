@@ -24,6 +24,9 @@ const userRouter = require("./routes/userRoutes");
 const authRouter = require("./routes/authRoutes")
 const { log } = require("console");
 
+// Use external packages
+app.use(cookieParser(process.env.JWT_SECRET))
+app.use(morgan("tiny"))
 // Use express middlewares
 app.use(express.json());
 // app.use(express.urlencoded({ extended: true}))
