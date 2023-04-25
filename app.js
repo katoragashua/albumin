@@ -47,7 +47,7 @@ const port = process.env.PORT || 5000;
 const start = async () => {
   try {
     await connectDb(process.env.MONGO_URI);
-    // await User.deleteMany()
+    // await User.deleteMany();
     app.listen(port, () => {
       console.log(`App listening on port ${port}`);
     });
