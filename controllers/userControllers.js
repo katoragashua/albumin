@@ -10,7 +10,7 @@ const getAllUsers = async (req, res) => {
 
 const getSingleUser = async (req, res) => {
   const { id: userId } = req.params;
-  const user = await User.findOne({ _id: userid });
+  const user = await User.findOne({ _id: userId });
   if (!user) {
     throw new CustomError.NotFoundError("User not found.");
   }
@@ -30,12 +30,61 @@ const getCurrentUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   const { id: userId } = req.params;
-  const {instagram, twitter, profileUrl } = req.body;
-  
+  const { instagram, twitter, profileUrl } = req.body;
+};
+
+const follow = async (req, res) => {
+  const { id: userId } = req.params;
+  const user = await User.findOne({ _id: userId });
+  const currentUser = await User.findOne({ _id: req.user.userId });
+
+  if (!user) {
+    throw new CustomError.NotFoundError("User not found");
+  }
+  if (user._id === currentUser._id) {
+    throw new CustomError.UnauthorizedError("Same user");
+  }
+
+  if (currentUser.following?.includes(user._id)) {
+    throw new CustomError.BadRequestError("Already following user");
+  }
+  currentUser.following = [...currentUser.following, user._id];
+  user.followers = [...user.followers, currentUser._id];
+  await user.save();
+  await currentUser.save();
+  res
+    .status(StatusCodes.OK)
+    .json({ msg: `Followed ${user.name.split(" ")[0]}`, currentUser });
+};
+
+const unfollow = async (req, res) => {
+  const { id: userId } = req.params;
+  const user = await User.findOne({ _id: userId });
+  const currentUser = await User.findOne({ _id: req.user.userId });
+
+  if (!user) {
+    throw new CustomError.NotFoundError("User not found");
+  }
+  if (user._id === currentUser._id) {
+    throw new CustomError.UnauthorizedError("Same user");
+  }
+
+  if (!currentUser.following?.includes(user._id)) {
+    throw new CustomError.BadRequestError("Not following user");
+  }
+  currentUser.following = currentUser.following.filter((id) => id === user._id);
+  user.followers = user.followers.filter((id) => id === currentUser._id);
+  await user.save();
+  await currentUser.save();
+  res
+    .status(StatusCodes.OK)
+    .json({ msg: `Unfollowed ${user.name.split(" ")[0]}`, currentUser });
 };
 
 module.exports = {
   getAllUsers,
   getSingleUser,
   getCurrentUser,
+  follow,
+  unfollow,
 };

@@ -75,6 +75,10 @@ const UserSchema = new Schema(
       type: [mongoose.Types.ObjectId],
       default: [],
     },
+    following: {
+      type: [mongoose.Types.ObjectId],
+      default: [],
+    },
     totalLikes: {
       type: [mongoose.Types.ObjectId],
       default: [],
@@ -85,7 +89,7 @@ const UserSchema = new Schema(
     },
     social: {
       type: SocialSchema,
-      default: {}
+      default: {},
     },
     isVerified: {
       type: Boolean,
