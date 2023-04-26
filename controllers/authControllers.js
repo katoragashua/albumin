@@ -84,13 +84,8 @@ const loginUser = async (req, res) => {
       throw new CustomError.UnauthenticatedError("Invalid credentials");
     }
     refreshToken = existingToken.refreshToken;
-    const accessTokenJWT = await utilFuncs.createJWT({ tokenUser });
-    const refreshTokenJWT = await utilFuncs.createJWT({
-      tokenUser,
-      refreshToken,
-    });
 
-    utilFuncs.attachCookies(res, accessTokenJWT, refreshTokenJWT);
+    utilFuncs.attachCookies(res, tokenUser, refreshToken);
     res.status(StatusCodes.OK).json({ user, msg: "Successfully logged in." });
     return;
   }
@@ -103,13 +98,8 @@ const loginUser = async (req, res) => {
   const tokenObj = { refreshToken, ip, userAgent, user: user._id };
   // Create token
   await Token.create(tokenObj);
-  const accessTokenJWT = await utilFuncs.createJWT({ tokenUser });
-  const refreshTokenJWT = await utilFuncs.createJWT({
-    tokenUser,
-    refreshToken,
-  });
 
-  utilFuncs.attachCookies(res, accessTokenJWT, refreshTokenJWT);
+  utilFuncs.attachCookies(res, tokenUser, refreshToken);
   res.status(StatusCodes.OK).json({ user, msg: "Successfully logged in." });
 };
 

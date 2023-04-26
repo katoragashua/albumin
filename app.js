@@ -16,6 +16,7 @@ const errorHandler = require("./middlewares/errorHandlerMiddleware");
 
 // Import models
 const User = require("./models/User");
+const Token = require("./models/Token")
 
 // Import DB
 const connectDb = require("./db/connect");
@@ -48,6 +49,7 @@ const start = async () => {
   try {
     await connectDb(process.env.MONGO_URI);
     // await User.deleteMany();
+    // await Token.deleteMany();
     app.listen(port, () => {
       console.log(`App listening on port ${port}`);
     });
