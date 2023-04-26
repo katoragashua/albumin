@@ -7,6 +7,7 @@ const utilFuncs = require("../utils/index");
 const createToken = require("../controllers/tokenControllers");
 const Token = require("../models/Token");
 
+// Compare passwords function
 const comparePasswords = async (password, userPassword) => {
   const isCorrectPassword = await bcrypt.compare(password, userPassword);
   if (!isCorrectPassword) {
@@ -53,6 +54,7 @@ const registerUser = async (req, res) => {
   });
 };
 
+// Login User
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
   // Check if the email address and password have been provided
@@ -77,6 +79,7 @@ const loginUser = async (req, res) => {
 
   let refreshToken = "";
   // check if user has existing token in db/ This helps so we don't have to create multiple tokens for one user
+  // Since we don't want to keep creating token documents on every login. We can check if a token exists already where the user property is set to the users _id property (user._id). If it does, we check if the existingToken' isValid property is set to true and set the refresh token declared above to the existingToken.refreshToken. Else we throw an error if the existingToken' isValid property is set to false
   const existingToken = await Token.findOne({ user: user._id });
   if (existingToken) {
     const { isValid } = existingToken;
@@ -85,7 +88,7 @@ const loginUser = async (req, res) => {
     }
     refreshToken = existingToken.refreshToken;
 
-    utilFuncs.attachCookies(res, tokenUser, refreshToken);
+    await utilFuncs.attachCookies(res, tokenUser, refreshToken);
     res.status(StatusCodes.OK).json({ user, msg: "Successfully logged in." });
     return;
   }
@@ -99,10 +102,27 @@ const loginUser = async (req, res) => {
   // Create token
   await Token.create(tokenObj);
 
-  utilFuncs.attachCookies(res, tokenUser, refreshToken);
+  await utilFuncs.attachCookies(res, tokenUser, refreshToken);
   res.status(StatusCodes.OK).json({ user, msg: "Successfully logged in." });
 };
 
+// Logout User
+const logoutUser = async (req, res) => {
+  console.log(req.user);
+  await Token.findOneAndDelete({ user: req.user.userId });
+
+  res.cookie("accessToken", "logout", {
+    httpOnly: true,
+    expires: new Date(Date.now()),
+  });
+  res.cookie("refreshToken", "logout", {
+    httpOnly: true,
+    expires: new Date(Date.now()),
+  });
+  res.status(StatusCodes.OK).json({ msg: "user logged out!" });
+};
+
+// Verify Email
 const verifyEmail = async (req, res) => {
   const { token, email } = req.body;
   // Check for user
@@ -124,6 +144,7 @@ const verifyEmail = async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: "User verified", user });
 };
 
+// Forgot password
 const forgotPassword = async (req, res) => {
   const { email } = req.body;
   if (!email) {
@@ -151,6 +172,7 @@ const forgotPassword = async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: "Success! Reset your password." });
 };
 
+// Reset Password
 const resetPassword = async (req, res) => {
   const { token, email, password } = req.body;
   if (!token || !email || !password) {
@@ -176,9 +198,24 @@ const resetPassword = async (req, res) => {
     .json({ msg: "Successfully changed password.", user });
 };
 
+// const sendEmail = async (req, res) => {
+//     sgMail.setApiKey(process.env.BANANA_BANDIT_KEY)
+//     const msg = {
+//       to: "katoragashua@gmail.com", // Change to your recipient
+//       from: "katoragashua@outlook.com", // Change to your verified sender
+//       subject: "Sending with SendGrid is Fun",
+//       // text: "and easy to do anywhere, even with Node.js",
+//       html: "<strong>and easy to do anywhere, even with Node.js</strong>",
+//     };
+//     const info = await sgMail.send(msg);
+//     // res.json(info);
+//     return info
+// }
+
 module.exports = {
   registerUser,
   loginUser,
+  logoutUser,
   verifyEmail,
   forgotPassword,
   resetPassword,

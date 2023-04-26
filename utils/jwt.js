@@ -40,4 +40,5 @@ module.exports = {
   createJWT,
   createUserObj,
   verifyJWT,
+  attachCookies
 };
