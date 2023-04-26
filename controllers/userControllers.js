@@ -30,8 +30,33 @@ const getCurrentUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   const { id: userId } = req.params;
-  const { instagram, twitter, profileUrl } = req.body;
+  const { instagram, twitter, portfolioUrl } = req.body;
+  const user = await User.findOne({ _id: userId });
+  if (!user) {
+    throw new CustomError.NotFoundError("User not found");
+  }
+  utilFuncs.checkPermissions(req.user, user._id);
+  const social = {
+    instagram,
+    twitter,
+    portfolioUrl,
+  };
+  user.social = social;
+  await user.save();
+  res.status(StatusCodes.OK).json({ user });
 };
+
+const deleteUser = async (req, res) => {
+  const { id: userId } = req.params;
+  const user = await User.findOne({ _id: userId });
+  if (!user) {
+    throw new CustomError.NotFoundError("User not found");
+  }
+  utilFuncs.checkPermissions(req.user, user._id);
+  await user.remove();
+  res.status(StatusCodes.OK).json({msg: "User removed successfully"});
+}
+
 
 const follow = async (req, res) => {
   const { id: userId } = req.params;
@@ -85,6 +110,8 @@ module.exports = {
   getAllUsers,
   getSingleUser,
   getCurrentUser,
+  updateUser,
+  deleteUser,
   follow,
   unfollow,
 };
