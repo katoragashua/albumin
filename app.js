@@ -25,6 +25,7 @@ const connectDb = require("./db/connect");
 // Import Routers
 const userRouter = require("./routes/userRoutes");
 const authRouter = require("./routes/authRoutes");
+const photoRouter = require("./routes/photoRoutes");
 const { log } = require("console");
 const { uploadImage } = require("./controllers/fileUploadControllers");
 
@@ -47,6 +48,7 @@ app.use(fileUpload({ useTempFiles: true }));
 // Use Routers
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/photos", photoRouter);
 
 app.post("/api/v1/upload-image", authenticateUser, uploadImage);
 

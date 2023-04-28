@@ -10,25 +10,42 @@ cloudinary.config({
   api_secret: process.env.API_SECRET
 });
 
-// const uploadImage = async (req, res) => {
-//   if (!req.files) {
-//     throw new customErrors.BadRequestError("Please add a file.");
-//   }
 
-//   const img = req.files.image;
+/*
+const uploadImage = async (req, res) => {
+  console.log(req.files);
+  // First check if theres a file in req.files. If not, throw an error
+  if (!req.files) {
+    throw new CustomError.BadRequestError("No file uploaded.");
+  }
+  // If there's a req.file, assign req.files.image to a variable
+  const img = req.files.image;
+  // Check if the file format is an image by checking req.files.mimetype. If not, throw an error.
+  if (!img.mimetype.startsWith("image")) {
+    throw new CustomError.BadRequestError("Please upload an image.");
+  }
 
-//   if (!req.files.image.mimetype.startsWith("image/")) {
-//     throw new customErrors.BadRequestError("Format must be an image.");
-//   }
+  // Optionally you can limit the size of images to 5mb
+  const maxSize = 1024 * 1024 * 5;
+  if (img.size > maxSize) {
+    throw new CustomError.BadRequestError("Image must be less than 5mb.");
+  }
+  // Use the path module to assign the image to a path you want it to be saved. As seen below.
+  const imgPath = path.resolve(
+    __dirname,
+    "../uploads",
+    `${img.name}`
+  );
+  // Use the express fileUpload method mv() to move the image file to the folder. This is asynchronous
+  await productImg.mv(imgPath);
 
-//   if (img.size > process.env.MAX_SIZE) {
-//     throw new customErrors.BadRequestError("Image size must be less than 5mb.");
-//   }
+  res.status(StatusCodes.OK).json({
+    image: { src: `/uploads/${productImg.name}` },
+    msg: "Image uploaded succesfully",
+  });
+};
 
-//   const imgPath = path.resolve(__dirname, "../uploads", `${img.name}`);
-//   await img.mv(imgPath);
-//   res.status(StatusCodes.OK).json({ image: { src: `/uploads/${img.name}` } });
-// };
+*/
 
 const uploadImage = async (req, res) => {
   // console.log(req.files.image);

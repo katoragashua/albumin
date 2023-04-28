@@ -53,7 +53,7 @@ const deleteUser = async (req, res) => {
     throw new CustomError.NotFoundError("User not found");
   }
   utilFuncs.checkPermissions(req.user, user._id);
-  await user.remove();
+  await user.deleteOne();
   res.status(StatusCodes.OK).json({msg: "User removed successfully"});
 }
 
