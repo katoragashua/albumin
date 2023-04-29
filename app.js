@@ -19,6 +19,7 @@ const { authenticateUser } = require("./middlewares/authentication");
 // Import models
 const User = require("./models/User");
 const Token = require("./models/Token");
+const Photo = require("./models/Photo");
 
 // Import DB
 const connectDb = require("./db/connect");
@@ -66,6 +67,7 @@ const start = async () => {
     await connectDb(process.env.MONGO_URI);
     // await User.deleteMany();
     // await Token.deleteMany();
+    // await Photo.deleteMany();
     app.listen(port, () => {
       console.log(`App listening on port ${port}`);
     });

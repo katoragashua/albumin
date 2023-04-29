@@ -41,6 +41,12 @@ const UserSchema = new Schema(
       minlength: 2,
       maxlength: 30,
     },
+    username: {
+      type: String,
+      trim: true,
+      minlength: 2,
+      maxlength: 30,
+    },
     email: {
       type: String,
       required: [true, "Please enter an email."],

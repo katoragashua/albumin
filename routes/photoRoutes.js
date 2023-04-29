@@ -5,10 +5,11 @@ const {
   authenticateUser,
   authorizePermissions,
 } = require("../middlewares/authentication");
+
 const {
   createPhoto
 } = require("../controllers/photoControllers");
 
-router.post("/:id", authenticateUser, createPhoto);
+router.post("/", authenticateUser, createPhoto);
 
 module.exports = router;

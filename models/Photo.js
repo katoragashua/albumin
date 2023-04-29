@@ -28,6 +28,7 @@ const PhotoSchema = new Schema(
   {
     url: {
       type: String,
+      unique: true,
       required: true,
     },
     description: {
@@ -46,8 +47,8 @@ const PhotoSchema = new Schema(
       enum: ["vertical", "horizontal", "square"],
     },
     user: {
-      type: UserSchema,
-      required: true,
+      type: mongoose.Types.ObjectId,
+      ref: "User"
     },
     likes: { type: [LikeSchema] },
     comments: { type: [CommentSchema] },
