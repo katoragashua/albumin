@@ -7,9 +7,15 @@ const {
 } = require("../middlewares/authentication");
 
 const {
-  createPhoto
+  createPhoto,
+  getAllPhotos,
+  getSinglePhoto,
+  getUserPhotos,
+  updatePhoto,
+  deletePhoto,
+  likePhoto,
 } = require("../controllers/photoControllers");
 
 router.post("/", authenticateUser, createPhoto);
-
+router.patch("/:id/like-photo", authenticateUser, likePhoto);
 module.exports = router;

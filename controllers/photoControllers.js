@@ -47,9 +47,55 @@ const updatePhoto = async (req, res) => {
   if (!photo) {
     throw new CustomError.NotFoundError("Photo was no found");
   }
+  console.log(photo.user);
+  utilFuncs.checkPermissions(req.user, photo.user);
   res.status(StatusCodes.OK).json(photo);
 };
 
+const deletePhoto = async (req, res) => {
+  const { id: photoId } = req.params;
+  const photo = await Photo.findOne({
+    _id: photoId,
+    user: req.user.userId,
+  });
+  if (!photo) {
+    throw new CustomError.NotFoundError("Photo was no found");
+  }
+  utilFuncs.checkPermissions(req.user, photo.user);
+  await photo.deleteOne();
+  res.status(StatusCodes.OK).json({ msg: "Photo deleted" });
+};
+
+const likePhoto = async (req, res) => {
+  const { id: photoId } = req.params;
+  const photo = await Photo.findOne({ _id: photoId });
+  // const user = await User.findOne({_id: req.user.userId})
+  if (!photo) {
+    throw new CustomError.NotFoundError("Photo was no found");
+  }
+  const likeObj = {
+    user: req.user.userId,
+    photo: photo._id,
+  };
+  photo.likes = [...photo.likes, likeObj];
+  await photo.save();
+  console.log(photo.user);
+  res.status(StatusCodes.OK).json({ msg: "Liked photo", photo });
+};
+
+const unlikePhoto = async (req, res) => {};
+
+const bookmarkPhoto = async (req, res) => {};
+
+const unbookmarkPhoto = async (req, res) => {};
+
 module.exports = {
   createPhoto,
+  getAllPhotos,
+  getSinglePhoto,
+  getUserPhotos,
+  updatePhoto,
+  deletePhoto,
+  likePhoto,
+  unlikePhoto,
 };
