@@ -8,13 +8,11 @@ const LocationSchema = new Schema({
   lat: { type: Number },
 });
 
-const CommentSchema = new Schema(
-  {
-    user: { type: mongoose.Types.ObjectId, required: true },
-    photo: { type: mongoose.Types.ObjectId, required: true },
-    comment: { type: String, required: true },
-  }
-);
+const CommentSchema = new Schema({
+  user: { type: mongoose.Types.ObjectId, required: true },
+  photo: { type: mongoose.Types.ObjectId, required: true },
+  comment: { type: String, required: true },
+});
 
 const LikeSchema = new Schema(
   {
@@ -40,6 +38,7 @@ const PhotoSchema = new Schema(
     location: {
       type: LocationSchema,
     },
+    tags: { type: [String] },
     height: { type: Number },
     width: { type: Number },
     orientation: {
@@ -48,7 +47,7 @@ const PhotoSchema = new Schema(
     },
     user: {
       type: mongoose.Types.ObjectId,
-      ref: "User"
+      ref: "User",
     },
     likes: { type: [LikeSchema] },
     comments: { type: [CommentSchema] },
@@ -56,6 +55,5 @@ const PhotoSchema = new Schema(
   },
   { timestamps: true }
 );
-
 
 module.exports = mongoose.model("Photo", PhotoSchema);

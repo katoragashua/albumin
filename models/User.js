@@ -12,7 +12,7 @@ const SocialSchema = new Schema({
     type: String,
     default: null,
   },
-  portfolioUrl: {
+  websiteUrl: {
     type: String,
     default: null,
   },

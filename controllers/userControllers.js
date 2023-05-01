@@ -30,7 +30,7 @@ const getCurrentUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   const { id: userId } = req.params;
-  const { instagram, twitter, portfolioUrl } = req.body;
+  const { instagram, twitter, websiteUrl } = req.body;
   const user = await User.findOne({ _id: userId });
   if (!user) {
     throw new CustomError.NotFoundError("User not found");
@@ -39,7 +39,7 @@ const updateUser = async (req, res) => {
   const social = {
     instagram,
     twitter,
-    portfolioUrl,
+    websiteUrl,
   };
   user.social = social;
   await user.save();
