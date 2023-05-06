@@ -89,6 +89,7 @@ const UserSchema = new Schema(
       type: [mongoose.Types.ObjectId],
       default: [],
     },
+    savedPhotos: { type: [mongoose.Types.ObjectId] },
     availableForWork: {
       type: Boolean,
       default: false,

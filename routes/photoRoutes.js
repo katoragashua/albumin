@@ -13,9 +13,11 @@ const {
   getUserPhotos,
   updatePhoto,
   deletePhoto,
-  likePhoto,
+  likeAndUnlikePhoto,
+  saveAndUnsavePhoto
 } = require("../controllers/photoControllers");
 
 router.post("/", authenticateUser, createPhoto);
-router.patch("/:id/like-photo", authenticateUser, likePhoto);
+router.patch("/:id/like-photo", authenticateUser, likeAndUnlikePhoto);
+router.post("/:id/save-photo", authenticateUser, saveAndUnsavePhoto);
 module.exports = router;

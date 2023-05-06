@@ -49,7 +49,7 @@ const PhotoSchema = new Schema(
       type: mongoose.Types.ObjectId,
       ref: "User",
     },
-    likes: { type: [LikeSchema] },
+    likes: { type: [mongoose.Types.ObjectId] },
     comments: { type: [CommentSchema] },
     downloads: { type: [mongoose.Types.ObjectId] },
   },

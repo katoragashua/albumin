@@ -5,6 +5,10 @@ const utilFuncs = require("../utils/index");
 const User = require("../models/User");
 const Comment = require("../models/Comment");
 
+/*
+// PHOTOS 
+*/
+
 const createPhoto = async (req, res) => {
   const { description, url } = req.body;
   if (!description || !url) {
@@ -39,6 +43,11 @@ const getSinglePhoto = async (req, res) => {
   if (!photo) {
     throw new CustomError.NotFoundError("Photo was no found");
   }
+  await photo.populate({
+    path: "user",
+    select:
+      "name firstName, lastName, username, email, availableForWork, userImage, location, social",
+  });
   res.status(StatusCodes.OK).json(photo);
 };
 
@@ -67,34 +76,49 @@ const deletePhoto = async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: "Photo deleted" });
 };
 
-const likePhoto = async (req, res) => {
+const likeAndUnlikePhoto = async (req, res) => {
   const { id: photoId } = req.params;
+  const { userId } = req.user;
   const photo = await Photo.findOne({ _id: photoId });
-  // const user = await User.findOne({_id: req.user.userId})
   if (!photo) {
-    throw new CustomError.NotFoundError("Photo was no found");
+    throw new CustomError.NotFoundError("Photo was not found");
   }
-  const likeObj = {
-    user: req.user.userId,
-    photo: photo._id,
-  };
 
-  for (like of photo.likes) {
-    if (like.user.toString() === likeObj.user) {
-      throw new CustomError.UnauthorizedError("Photo already liked by user");
-    }
-    photo.likes = [...photo.likes, likeObj];
+  if (!photo.likes.includes(userId)) {
+    // photo.likes = [...photo.likes, userId]; // or
+    await photo.likes.push(userId);
+    await photo.save();
+    console.log(photo.user);
+    res.status(StatusCodes.OK).json({ msg: "Liked photo", photo });
+    return;
+  } else {
+    await photo.likes.pull(userId);
+    await photo.save();
+    console.log(photo.user);
+    res.status(StatusCodes.OK).json({ msg: "Unliked photo", photo });
+    return;
   }
-  await photo.save();
-  console.log(photo.user);
-  res.status(StatusCodes.OK).json({ msg: "Liked photo", photo });
 };
 
-const unlikePhoto = async (req, res) => {};
+const saveAndUnsavePhoto = async (req, res) => {
+  const { id: photoId } = req.params;
+  console.log(photoId);
+  const { userId } = req.user;
+  const photo = await Photo.findById({ _id: photoId });
+  if (!photo) throw new CustomError.BadRequestError("Photo not found.");
+  const user = await User.findById({ _id: userId });
+  if (!user.savedPhotos.includes(photoId)) {
+    await user.savedPhotos.push(photoId);
+    await user.save();
+    return res.status(StatusCodes.OK).json({ message: "Photo saved.", user });
+  } else {
+    await user.savedPhotos.pull(photoId);
+    await user.save();
+    return res.status(StatusCodes.OK).json({ message: "Photo unsaved.", user });
+  }
+};
 
-const bookmarkPhoto = async (req, res) => {};
-
-const unbookmarkPhoto = async (req, res) => {};
+const unSavePhoto = async (req, res) => {};
 
 /*
 // COMMENTS
@@ -148,7 +172,7 @@ const deleteComment = async (req, res) => {
 
 /*
 // REPLIES
- */
+*/
 
 const createReply = async (req, res) => {
   const { id: commentId } = req.params;
@@ -162,7 +186,6 @@ const createReply = async (req, res) => {
   res.status(StatusCodes.CREATED).json({ userComment });
 };
 
-
 // const deleteReply = async (req, res) => {
 //   const { id: replyId } = req.params;
 //   const comment = await Comment.findOne({ _id: commentId });
@@ -174,7 +197,6 @@ const createReply = async (req, res) => {
 //   res.status(StatusCodes.CREATED).json({ userComment });
 // };
 
-
 module.exports = {
   createPhoto,
   getAllPhotos,
@@ -182,6 +204,29 @@ module.exports = {
   getUserPhotos,
   updatePhoto,
   deletePhoto,
-  likePhoto,
-  unlikePhoto,
+  likeAndUnlikePhoto,
+  saveAndUnsavePhoto
 };
+
+// const likePhoto = async (req, res) => {
+//   const { id: photoId } = req.params;
+//   const photo = await Photo.findOne({ _id: photoId });
+//   // const user = await User.findOne({_id: req.user.userId})
+//   if (!photo) {
+//     throw new CustomError.NotFoundError("Photo was not found");
+//   }
+//   const likeObj = {
+//     user: req.user.userId,
+//     photo: photo._id,
+//   };
+
+//   for (like of photo.likes) {
+//     if (like.user.toString() === likeObj.user) {
+//       throw new CustomError.UnauthorizedError("Photo already liked by user");
+//     }
+//     photo.likes = [...photo.likes, likeObj];
+//   }
+//   await photo.save();
+//   console.log(photo.user);
+//   res.status(StatusCodes.OK).json({ msg: "Liked photo", photo });
+// };
