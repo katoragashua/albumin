@@ -17,12 +17,6 @@ const {
   saveAndUnsavePhoto,
 } = require("../controllers/photoControllers");
 
-const {
-  createComment,
-  updateComment,
-  deleteComment,
-  createReply,
-} = require("../controllers/commentAndReplyControllers");
 
 router.post("/", authenticateUser, createPhoto);
 router.get("/", authenticateUser, getAllPhotos);
@@ -37,10 +31,6 @@ router.post("/:id/like-photo", authenticateUser, likeAndUnlikePhoto);
 // Save
 router.post("/:id/save-photo", authenticateUser, saveAndUnsavePhoto);
 
-// Comments
-router.post("/:id/create-comment", authenticateUser, createComment);
-router.post("/:id/update-comment", authenticateUser, updateComment);
-router.delete("/:id/delete-comment", authenticateUser, deleteComment);
-router.post("/:id/create-reply", authenticateUser, createReply);
+
 
 module.exports = router;

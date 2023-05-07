@@ -28,7 +28,7 @@ const createPhoto = async (req, res) => {
 };
 
 const getUserPhotos = async (req, res) => {
-  const photos = await Photo.find({ _id: req.user.userId });
+  const photos = await Photo.find({ user: req.user.userId });
   res.status(StatusCodes.OK).json({ results: photos, count: photos.length });
 };
 
@@ -48,6 +48,7 @@ const getSinglePhoto = async (req, res) => {
     select:
       "name firstName, lastName, username, email, availableForWork, userImage, location, social",
   });
+  
   res.status(StatusCodes.OK).json(photo);
 };
 
@@ -120,9 +121,6 @@ const saveAndUnsavePhoto = async (req, res) => {
 
 const unSavePhoto = async (req, res) => {};
 
-
-
-
 module.exports = {
   createPhoto,
   getAllPhotos,
@@ -131,7 +129,7 @@ module.exports = {
   updatePhoto,
   deletePhoto,
   likeAndUnlikePhoto,
-  saveAndUnsavePhoto
+  saveAndUnsavePhoto,
 };
 
 // const likePhoto = async (req, res) => {

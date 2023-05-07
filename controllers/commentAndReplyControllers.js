@@ -10,8 +10,7 @@ const Comment = require("../models/Comment");
 */
 
 const createComment = async (req, res) => {
-  const { id: photoId } = req.params;
-  const { comment } = req.body;
+  const { photo: photoId, comment } = req.body;
   const photo = await Photo.findOne({ _id: photoId });
   if (!photo) {
     throw new CustomError.NotFoundError("Photo was not found");
@@ -25,19 +24,33 @@ const createComment = async (req, res) => {
   res.status(StatusCodes.CREATED).json({ userComment });
 };
 
+const getAllComments = async (req, res) => {
+  const comments = await Comment.find({})
+  res.status(StatusCodes.OK).json(comments)
+}
+
+const getSingleComment = async (req, res) => {
+  const { id: commentId } = req.params;
+  const comment = await Comment.findOne({ _id: commentId });
+  if(!comment) {
+    throw new CustomError.BadRequestError("Comment not found.")
+  }
+  res.status(StatusCodes.OK).json(comment);
+};
+
 const updateComment = async (req, res) => {
   const { id: commentId } = req.params;
   const { comment } = req.body;
   const userComment = await Comment.findOne({ _id: commentId });
   if (!userComment) {
-    throw new CustomError.NotFoundError("Photo was not found");
+    throw new CustomError.NotFoundError("Comment not found");
   }
   utilFuncs.checkPermissions(req.user, userComment.user);
   userComment.comment = comment;
   await userComment.save();
 
   res
-    .status(StatusCodes.CREATED)
+    .status(StatusCodes.OK)
     .json({ msg: "Comment updated.", userComment });
 };
 
@@ -67,8 +80,9 @@ const createReply = async (req, res) => {
     throw new CustomError.NotFoundError("Comment was not found");
   }
   const replyObj = { user: req.user.userId, comment: comment._id, reply };
-  comment.reply = [...comment.reply, replyObj];
-  res.status(StatusCodes.CREATED).json({ userComment });
+  comment.replies = [...comment.replies, replyObj];
+  await comment.save();
+  res.status(StatusCodes.CREATED).json({ comment });
 };
 
 // const updateReply = async (req, res) => {
@@ -77,8 +91,8 @@ const createReply = async (req, res) => {
 //   if (!comment) {
 //     throw new CustomError.NotFoundError("Comment was not found.");
 //   }
-  
-//   const reply = await comment.replies() 
+
+//   const reply = await comment.replies()
 //   res.status(StatusCodes.CREATED).json({ userComment });
 // };
 
@@ -87,4 +101,6 @@ module.exports = {
   updateComment,
   deleteComment,
   createReply,
+  getAllComments,
+  getSingleComment
 };

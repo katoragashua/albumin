@@ -20,6 +20,7 @@ const { authenticateUser } = require("./middlewares/authentication");
 const User = require("./models/User");
 const Token = require("./models/Token");
 const Photo = require("./models/Photo");
+const Comment = require("./models/Comment");
 
 // Import DB
 const connectDb = require("./db/connect");
@@ -27,6 +28,7 @@ const connectDb = require("./db/connect");
 const userRouter = require("./routes/userRoutes");
 const authRouter = require("./routes/authRoutes");
 const photoRouter = require("./routes/photoRoutes");
+const commentRouter = require("./routes/commentRoutes");
 const { log } = require("console");
 const { uploadImage } = require("./controllers/fileUploadControllers");
 
@@ -50,6 +52,7 @@ app.use(fileUpload({ useTempFiles: true }));
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/photos", photoRouter);
+app.use("/api/v1/comments", commentRouter);
 
 app.post("/api/v1/upload-image", authenticateUser, uploadImage);
 
@@ -68,6 +71,7 @@ const start = async () => {
     // await User.deleteMany();
     // await Token.deleteMany();
     // await Photo.deleteMany();
+    // await Comment.deleteMany();
     app.listen(port, () => {
       console.log(`App listening on port ${port}`);
     });
