@@ -9,6 +9,7 @@ const Comment = require("../models/Comment");
 // PHOTOS 
 */
 
+// Create Photo
 const createPhoto = async (req, res) => {
   const { description, url } = req.body;
   if (!description || !url) {
@@ -24,19 +25,28 @@ const createPhoto = async (req, res) => {
   });
   //   await photo.save()
   console.log(photo);
-  res.status(StatusCodes.CREATED).json({ photo });
+  res
+    .status(StatusCodes.CREATED)
+    .json({ message: "Photo saved successfully.", photo });
 };
 
+// Get User Photos
 const getUserPhotos = async (req, res) => {
   const photos = await Photo.find({ user: req.user.userId });
-  res.status(StatusCodes.OK).json({ results: photos, count: photos.length });
+  res
+    .status(StatusCodes.OK)
+    .json({ message: "Success", results: photos, count: photos.length });
 };
 
+// Get All Photos
 const getAllPhotos = async (req, res) => {
   const photos = await Photo.find({}).sort("-createdAt");
-  res.status(StatusCodes.OK).json({ results: photos, count: photos.length });
+  res
+    .status(StatusCodes.OK)
+    .json({ message: "Success", results: photos, count: photos.length });
 };
 
+// Get Single Photos
 const getSinglePhoto = async (req, res) => {
   const { id: photoId } = req.params;
   const photo = await Photo.findOne({ _id: photoId });
@@ -48,35 +58,38 @@ const getSinglePhoto = async (req, res) => {
     select:
       "name firstName, lastName, username, email, availableForWork, userImage, location, social",
   });
-  
-  res.status(StatusCodes.OK).json(photo);
+  await photo.populate("comments");
+  res.status(StatusCodes.OK).json({ message: "Success", photo });
 };
 
+// Update Photo
 const updatePhoto = async (req, res) => {
   const { id: photoId } = req.params;
   const photo = await Photo.findOne({ _id: photoId, user: req.user.userId });
   if (!photo) {
-    throw new CustomError.NotFoundError("Photo was no found");
+    throw new CustomError.NotFoundError("Photo was not found");
   }
   console.log(photo.user);
   utilFuncs.checkPermissions(req.user, photo.user);
-  res.status(StatusCodes.OK).json(photo);
+  res.status(StatusCodes.OK).json({ message: "Success", photo });
 };
 
+// Delete Photo
 const deletePhoto = async (req, res) => {
   const { id: photoId } = req.params;
   const photo = await Photo.findOne({
     _id: photoId,
-    user: req.user.userId,
   });
   if (!photo) {
-    throw new CustomError.NotFoundError("Photo was no found");
+    throw new CustomError.NotFoundError("Photo was not found");
   }
   utilFuncs.checkPermissions(req.user, photo.user);
+  await Comment.deleteMany({photo: photoId});
   await photo.deleteOne();
-  res.status(StatusCodes.OK).json({ msg: "Photo deleted" });
+  res.status(StatusCodes.OK).json({ message: "Photo deleted" });
 };
 
+// Like and Unlike Photo
 const likeAndUnlikePhoto = async (req, res) => {
   const { id: photoId } = req.params;
   const { userId } = req.user;
@@ -90,17 +103,18 @@ const likeAndUnlikePhoto = async (req, res) => {
     await photo.likes.push(userId);
     await photo.save();
     console.log(photo.user);
-    res.status(StatusCodes.OK).json({ msg: "Liked photo", photo });
+    res.status(StatusCodes.OK).json({ message: "Liked photo", photo });
     return;
   } else {
     await photo.likes.pull(userId);
     await photo.save();
     console.log(photo.user);
-    res.status(StatusCodes.OK).json({ msg: "Unliked photo", photo });
+    res.status(StatusCodes.OK).json({ message: "Unliked photo", photo });
     return;
   }
 };
 
+// Save and Unsave Photo
 const saveAndUnsavePhoto = async (req, res) => {
   const { id: photoId } = req.params;
   console.log(photoId);
@@ -118,8 +132,6 @@ const saveAndUnsavePhoto = async (req, res) => {
     return res.status(StatusCodes.OK).json({ message: "Photo unsaved.", user });
   }
 };
-
-const unSavePhoto = async (req, res) => {};
 
 module.exports = {
   createPhoto,
@@ -152,5 +164,5 @@ module.exports = {
 //   }
 //   await photo.save();
 //   console.log(photo.user);
-//   res.status(StatusCodes.OK).json({ msg: "Liked photo", photo });
+//   res.status(StatusCodes.OK).json({ message: "Liked photo", photo });
 // };

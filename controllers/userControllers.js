@@ -5,7 +5,9 @@ const utilFuncs = require("../utils/index");
 
 const getAllUsers = async (req, res) => {
   const users = await User.find({});
-  res.status(StatusCodes.OK).json({ users, count: users.length });
+  res
+    .status(StatusCodes.OK)
+    .json({ message: "Success", users, count: users.length });
 };
 
 const getSingleUser = async (req, res) => {
@@ -15,7 +17,7 @@ const getSingleUser = async (req, res) => {
     throw new CustomError.NotFoundError("User not found.");
   }
 
-  res.status(StatusCodes.OK).json(user);
+  res.status(StatusCodes.OK).json({ message: "Success", user });
 };
 
 const getCurrentUser = async (req, res) => {
@@ -25,7 +27,7 @@ const getCurrentUser = async (req, res) => {
   }
   utilFuncs.checkPermissions(res.user, user._id);
 
-  res.status(StatusCodes.OK).json({ user });
+  res.status(StatusCodes.OK).json({ message: "Success", user });
 };
 
 const updateUser = async (req, res) => {
@@ -43,7 +45,7 @@ const updateUser = async (req, res) => {
   };
   user.social = social;
   await user.save();
-  res.status(StatusCodes.OK).json({ user });
+  res.status(StatusCodes.OK).json({ message: "Success", user });
 };
 
 const deleteUser = async (req, res) => {
@@ -54,9 +56,8 @@ const deleteUser = async (req, res) => {
   }
   utilFuncs.checkPermissions(req.user, user._id);
   await user.deleteOne();
-  res.status(StatusCodes.OK).json({msg: "User removed successfully"});
-}
-
+  res.status(StatusCodes.OK).json({ message: "User removed successfully" });
+};
 
 const follow = async (req, res) => {
   const { id: userId } = req.params;
@@ -79,7 +80,7 @@ const follow = async (req, res) => {
   await currentUser.save();
   res
     .status(StatusCodes.OK)
-    .json({ msg: `Followed ${user.name.split(" ")[0]}`, currentUser });
+    .json({ message: `Followed ${user.name.split(" ")[0]}`, currentUser });
 };
 
 const unfollow = async (req, res) => {
@@ -103,7 +104,7 @@ const unfollow = async (req, res) => {
   await currentUser.save();
   res
     .status(StatusCodes.OK)
-    .json({ msg: `Unfollowed ${user.name.split(" ")[0]}`, currentUser });
+    .json({ message: `Unfollowed ${user.name.split(" ")[0]}`, currentUser });
 };
 
 module.exports = {

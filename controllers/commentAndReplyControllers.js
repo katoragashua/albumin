@@ -24,20 +24,23 @@ const createComment = async (req, res) => {
   res.status(StatusCodes.CREATED).json({ userComment });
 };
 
+// Get All Comments
 const getAllComments = async (req, res) => {
-  const comments = await Comment.find({})
-  res.status(StatusCodes.OK).json(comments)
-}
+  const comments = await Comment.find({});
+  res.status(StatusCodes.OK).json(comments);
+};
 
+// Get Single Comment
 const getSingleComment = async (req, res) => {
   const { id: commentId } = req.params;
   const comment = await Comment.findOne({ _id: commentId });
-  if(!comment) {
-    throw new CustomError.BadRequestError("Comment not found.")
+  if (!comment) {
+    throw new CustomError.BadRequestError("Comment not found.");
   }
-  res.status(StatusCodes.OK).json(comment);
+  res.status(StatusCodes.OK).json({ message: "Success", comment });
 };
 
+// Update Comment
 const updateComment = async (req, res) => {
   const { id: commentId } = req.params;
   const { comment } = req.body;
@@ -49,11 +52,10 @@ const updateComment = async (req, res) => {
   userComment.comment = comment;
   await userComment.save();
 
-  res
-    .status(StatusCodes.OK)
-    .json({ msg: "Comment updated.", userComment });
+  res.status(StatusCodes.OK).json({ message: "Comment updated.", userComment });
 };
 
+// Delete Comment
 const deleteComment = async (req, res) => {
   const { id: commentId } = req.params;
   const userComment = await Comment.findOne({ _id: commentId });
@@ -63,15 +65,14 @@ const deleteComment = async (req, res) => {
   utilFuncs.checkPermissions(req.user, userComment.user);
   await userComment.deleteOne();
 
-  res
-    .status(StatusCodes.CREATED)
-    .json({ msg: "Comment was successfully deleted." });
+  res.status(StatusCodes.CREATED).json({ message: "Comment deleted." });
 };
 
 /*
 // REPLIES
 */
 
+// Create a Reply
 const createReply = async (req, res) => {
   const { id: commentId } = req.params;
   const { reply } = req.body;
@@ -82,7 +83,7 @@ const createReply = async (req, res) => {
   const replyObj = { user: req.user.userId, comment: comment._id, reply };
   comment.replies = [...comment.replies, replyObj];
   await comment.save();
-  res.status(StatusCodes.CREATED).json({ comment });
+  res.status(StatusCodes.CREATED).json({ message: "Success", comment });
 };
 
 // const updateReply = async (req, res) => {
@@ -102,5 +103,5 @@ module.exports = {
   deleteComment,
   createReply,
   getAllComments,
-  getSingleComment
+  getSingleComment,
 };
