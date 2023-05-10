@@ -15,6 +15,7 @@ const {
   deletePhoto,
   likeAndUnlikePhoto,
   saveAndUnsavePhoto,
+  downloadPhoto
 } = require("../controllers/photoControllers");
 
 

@@ -66,20 +66,20 @@ const uploadImage = async (req, res) => {
     throw new CustomError.BadRequestError("Please upload an image.");
   }
 
-  // Optionally you can limit the size of images to 10mb
-  const maxSize = 1024 * 1024 * 10;
+  // Optionally you can limit the size of images to 15mb
+  const maxSize = 1024 * 1024 * 15;
   if (img.size > maxSize)
-    throw new CustomError.BadRequestError("Image must be less than 5mb.");
+    throw new CustomError.BadRequestError("Image must be less than 15mb.");
   // Uploading to cloudinary
-  const result = await cloudinary.uploader.upload(
-    req.files.image.tempFilePath,
-    {
-      use_filename: true,
-      folder: "file_upload",
-      categorization: "aws_rek_tagging",
-      auto_tagging: 0.7,
-    }
-  );
+  // const result = await cloudinary.uploader.upload(
+  //   req.files.image.tempFilePath,
+  //   {
+  //     use_filename: true,
+  //     folder: "file_upload",
+  //     categorization: "aws_rek_tagging",
+  //     auto_tagging: 0.7,
+  //   }
+  // );
   // const exifData = await exifr.parse(req.files.image.tempFilePath);
   const exifData = await exif.read(req.files.image.tempFilePath);
   if (!exifData) {
@@ -89,14 +89,14 @@ const uploadImage = async (req, res) => {
       "Photo has no metadata. Please upload only photos taken from a camera."
     );
   }
-  const { image, exif: more } = exifData;
-  console.log(image, more);
+  // const { image, exif: more } = exifData;
+  // console.log(image, more);
   // get orientation
   // const orientation = await exifr.orientation(req.files.image.tempFilePath);
   // Removing the tempfiles
   fs.unlinkSync(req.files.image.tempFilePath);
 
-  res.status(StatusCodes.OK).json({ image: { src: result }, exifData });
+  res.status(StatusCodes.OK).json({  exifData });
 };
 
 // const uploadImage = async (req, res) => {

@@ -133,6 +133,10 @@ const saveAndUnsavePhoto = async (req, res) => {
   }
 };
 
+const downloadPhoto = async (req, res) => {
+  res.status(StatusCodes.OK).json({ message: "Photo downloaded successfully."})
+}
+
 module.exports = {
   createPhoto,
   getAllPhotos,
@@ -142,6 +146,7 @@ module.exports = {
   deletePhoto,
   likeAndUnlikePhoto,
   saveAndUnsavePhoto,
+  downloadPhoto
 };
 
 // const likePhoto = async (req, res) => {
