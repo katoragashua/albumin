@@ -5,7 +5,7 @@ const { StatusCodes } = require("http-status-codes");
 const exifr = require("exifr");
 const { log } = require("console");
 const CustomError = require("../errors/index");
-const exif = require("fast-exif");
+const exifLib = require("fast-exif");
 const ImageKit = require("imagekit");
 
 // Imagekit SDK configuration
@@ -71,17 +71,17 @@ const uploadImage = async (req, res) => {
   if (img.size > maxSize)
     throw new CustomError.BadRequestError("Image must be less than 15mb.");
   // Uploading to cloudinary
-  // const result = await cloudinary.uploader.upload(
-  //   req.files.image.tempFilePath,
-  //   {
-  //     use_filename: true,
-  //     folder: "file_upload",
-  //     categorization: "aws_rek_tagging",
-  //     auto_tagging: 0.7,
-  //   }
-  // );
+  const result = await cloudinary.uploader.upload(
+    req.files.image.tempFilePath,
+    {
+      use_filename: true,
+      folder: "file_upload",
+      categorization: "aws_rek_tagging",
+      auto_tagging: 0.7,
+    }
+  );
   // const exifData = await exifr.parse(req.files.image.tempFilePath);
-  const exifData = await exif.read(req.files.image.tempFilePath);
+  const exifData = await exifLib.read(req.files.image.tempFilePath);
   if (!exifData) {
     // Removing the tempfiles
     fs.unlinkSync(req.files.image.tempFilePath);
@@ -89,14 +89,17 @@ const uploadImage = async (req, res) => {
       "Photo has no metadata. Please upload only photos taken from a camera."
     );
   }
-  // const { image, exif: more } = exifData;
-  // console.log(image, more);
+  const {
+    image: { Make, Model, Orientation },
+    exif: { LensModel },
+  } = exifData;
+
   // get orientation
   // const orientation = await exifr.orientation(req.files.image.tempFilePath);
   // Removing the tempfiles
   fs.unlinkSync(req.files.image.tempFilePath);
 
-  res.status(StatusCodes.OK).json({  exifData });
+  res.status(StatusCodes.OK).json({result , Make, Model, Orientation, LensModel });
 };
 
 // const uploadImage = async (req, res) => {
@@ -118,7 +121,6 @@ const uploadImage = async (req, res) => {
 //   // Use the express fileUpload method mv() to move the image file to the folder. This is asynchronous
 //   await img.mv(imgPath);
 
-  
 //   const file = fs.readFileSync(imgPath);
 
 //   console.log(file);
@@ -128,7 +130,7 @@ const uploadImage = async (req, res) => {
 //     ["tag1", "tag2"], 
 //     extensions: [
 //       {
-//         name: "google-auto-tagging", //"aws-auto-tagging":
+//         name: "google-auto-tagging", // or "aws-auto-tagging":
 //         maxTags: 20,
 //         minConfidence: 65,
 //       },

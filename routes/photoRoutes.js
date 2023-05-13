@@ -18,7 +18,6 @@ const {
   downloadPhoto
 } = require("../controllers/photoControllers");
 
-
 router.post("/", authenticateUser, createPhoto);
 router.get("/", authenticateUser, getAllPhotos);
 router.get("/:id", authenticateUser, getSinglePhoto);

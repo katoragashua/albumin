@@ -11,13 +11,14 @@ const Comment = require("../models/Comment");
 
 // Create Photo
 const createPhoto = async (req, res) => {
-  const { description, url } = req.body;
+  const { description, url, tags } = req.body;
   if (!description || !url) {
     throw new CustomError.BadRequestError("Please enter a description or url");
   }
   const user = await User.findOne({ _id: req.user.userId });
   if (!user) throw new CustomError.NotFoundError("User not found");
-  const photo = await Photo.create({ description, url, user: req.user.userId });
+  const photo = await Photo.create({ description, url, user: req.user.userId, tags });
+
   await photo.populate({
     path: "user",
     select:
@@ -40,7 +41,9 @@ const getUserPhotos = async (req, res) => {
 
 // Get All Photos
 const getAllPhotos = async (req, res) => {
-  const photos = await Photo.find({}).sort("-createdAt");
+  const photos = await Photo.find({}).sort("-createdAt").populate({path: "user",
+    select:
+      "name firstName, lastName, username, email, availableForWork, userImage, location, social",});
   res
     .status(StatusCodes.OK)
     .json({ message: "Success", results: photos, count: photos.length });

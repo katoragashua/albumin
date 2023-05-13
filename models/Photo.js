@@ -38,7 +38,7 @@ const PhotoSchema = new Schema(
     location: {
       type: LocationSchema,
     },
-    tags: { type: [String], default: []},
+    tags: { type: [String]},
     height: { type: Number },
     width: { type: Number },
     orientation: {

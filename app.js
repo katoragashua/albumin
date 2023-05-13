@@ -31,6 +31,7 @@ const photoRouter = require("./routes/photoRoutes");
 const commentRouter = require("./routes/commentRoutes");
 const { log } = require("console");
 const { uploadImage } = require("./controllers/fileUploadControllers");
+const getExif = require("./controllers/exifController")
 
 // cloudinary configuration
 cloudinary.config({
@@ -55,6 +56,8 @@ app.use("/api/v1/photos", photoRouter);
 app.use("/api/v1/comments", commentRouter);
 
 app.post("/api/v1/upload-image", authenticateUser, uploadImage);
+app.post("/api/v1/get-exif", authenticateUser, getExif);
+
 
 app.get("/", (req, res) => {
   res.send("<h1>Lens App.</h1>");
