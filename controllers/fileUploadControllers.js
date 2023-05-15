@@ -7,6 +7,7 @@ const { log } = require("console");
 const CustomError = require("../errors/index");
 const exifLib = require("fast-exif");
 const ImageKit = require("imagekit");
+const utilFuncs = require("../utils/index");
 
 // Imagekit SDK configuration
 const imagekit = new ImageKit({
@@ -54,6 +55,7 @@ const uploadImage = async (req, res) => {
 };
 */
 
+// Upload using cloudinary
 const uploadImage = async (req, res) => {
   // First check if theres a file in req.files. If not, throw an error
   if (!req.files) {
@@ -68,8 +70,12 @@ const uploadImage = async (req, res) => {
 
   // Optionally you can limit the size of images to 15mb
   const maxSize = 1024 * 1024 * 15;
+  const minSize = 1024 * 1024 * 3;
   if (img.size > maxSize)
-    throw new CustomError.BadRequestError("Image must be less than 15mb.");
+    // if (img.size > maxSize || img.size < minSize)
+    throw new CustomError.BadRequestError(
+      "Image must be greater than 3mb less than 15mb."
+    );
   // Uploading to cloudinary
   const result = await cloudinary.uploader.upload(
     req.files.image.tempFilePath,
@@ -90,18 +96,43 @@ const uploadImage = async (req, res) => {
     );
   }
   const {
+    secure_url,
+    height,
+    width,
+    signature,
+    tags: taggs,
+    asset_id,
+  } = result;
+  const tags = await utilFuncs.tagImage(secure_url);
+
+  const {
     image: { Make, Model, Orientation },
     exif: { LensModel },
   } = exifData;
 
-  // get orientation
-  // const orientation = await exifr.orientation(req.files.image.tempFilePath);
   // Removing the tempfiles
   fs.unlinkSync(req.files.image.tempFilePath);
 
-  res.status(StatusCodes.OK).json({result , Make, Model, Orientation, LensModel });
+  res.status(StatusCodes.OK).json({
+    secure_url,
+    height,
+    width,
+    signature,
+    taggs,
+    asset_id,
+    Make,
+    Model,
+    Orientation,
+    LensModel,
+    tags,
+  });
 };
 
+module.exports = {
+  uploadImage,
+};
+
+// // Using ImageKit
 // const uploadImage = async (req, res) => {
 //   if (!req.files) throw new CustomError.BadRequestError("No file uploaded.");
 
@@ -127,7 +158,7 @@ const uploadImage = async (req, res) => {
 //   const image = await imagekit.upload({
 //     file: file, //required
 //     fileName: "image", //requiredextensions:
-//     ["tag1", "tag2"], 
+//     ["tag1", "tag2"],
 //     extensions: [
 //       {
 //         name: "google-auto-tagging", // or "aws-auto-tagging":
@@ -138,7 +169,3 @@ const uploadImage = async (req, res) => {
 //   });
 //   res.status(StatusCodes.OK).json({ image });
 // };
-
-module.exports = {
-  uploadImage,
-};

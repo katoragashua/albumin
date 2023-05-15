@@ -42,7 +42,7 @@ const tagImage = async (req, res) => {
     tags = [
       ...data.result.tags.reduce((acc, cur) => {
         const { confidence, tag } = cur;
-        if(confidence > 13) {
+        if (confidence > 13) {
           acc.push(tag.en);
         }
         return acc;
@@ -55,7 +55,4 @@ const tagImage = async (req, res) => {
   }
 };
 
-module.exports = {
-  tagImage,
-};
-
+module.exports = tagImage
