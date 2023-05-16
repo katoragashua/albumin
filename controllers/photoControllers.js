@@ -17,7 +17,12 @@ const createPhoto = async (req, res) => {
   }
   const user = await User.findOne({ _id: req.user.userId });
   if (!user) throw new CustomError.NotFoundError("User not found");
-  const photo = await Photo.create({ description, url, user: req.user.userId, tags });
+  const photo = await Photo.create({
+    description,
+    url,
+    user: req.user.userId,
+    tags,
+  });
 
   await photo.populate({
     path: "user",
@@ -41,9 +46,13 @@ const getUserPhotos = async (req, res) => {
 
 // Get All Photos
 const getAllPhotos = async (req, res) => {
-  const photos = await Photo.find({}).sort("-createdAt").populate({path: "user",
-    select:
-      "name firstName, lastName, username, email, availableForWork, userImage, location, social",});
+  const photos = await Photo.find({})
+    .sort("-createdAt")
+    .populate({
+      path: "user",
+      select:
+        "name firstName, lastName, username, email, availableForWork, userImage, location, social",
+    });
   res
     .status(StatusCodes.OK)
     .json({ message: "Success", results: photos, count: photos.length });
@@ -72,8 +81,8 @@ const updatePhoto = async (req, res) => {
   if (!photo) {
     throw new CustomError.NotFoundError("Photo was not found");
   }
-  console.log(photo.user);
   utilFuncs.checkPermissions(req.user, photo.user);
+  
   res.status(StatusCodes.OK).json({ message: "Success", photo });
 };
 
@@ -87,7 +96,7 @@ const deletePhoto = async (req, res) => {
     throw new CustomError.NotFoundError("Photo was not found");
   }
   utilFuncs.checkPermissions(req.user, photo.user);
-  await Comment.deleteMany({photo: photoId});
+  await Comment.deleteMany({ photo: photoId });
   await photo.deleteOne();
   res.status(StatusCodes.OK).json({ message: "Photo deleted" });
 };
@@ -137,8 +146,10 @@ const saveAndUnsavePhoto = async (req, res) => {
 };
 
 const downloadPhoto = async (req, res) => {
-  res.status(StatusCodes.OK).json({ message: "Photo downloaded successfully."})
-}
+  res
+    .status(StatusCodes.OK)
+    .json({ message: "Photo downloaded successfully." });
+};
 
 module.exports = {
   createPhoto,
@@ -149,7 +160,7 @@ module.exports = {
   deletePhoto,
   likeAndUnlikePhoto,
   saveAndUnsavePhoto,
-  downloadPhoto
+  downloadPhoto,
 };
 
 // const likePhoto = async (req, res) => {

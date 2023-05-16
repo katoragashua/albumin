@@ -48,7 +48,6 @@ const tagImage = async (req, res) => {
         return acc;
       }, []),
     ];
-    console.log(tags);
     return tags;
   } catch (error) {
     console.log("error: ", error);

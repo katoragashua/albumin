@@ -4,6 +4,8 @@ const { createJWT, createUserObj, verifyJWT, attachCookies } = require("./jwt");
 const checkPermissions = require("./checkPermissions");
 const sendResetEmail = require("./sendResetEmail");
 const tagImage = require("./tagImage");
+const getExif = require("./getExif");
+const uploadPhoto = require("./uploadPhoto");
 
 module.exports = {
   sendEmail,
@@ -14,5 +16,7 @@ module.exports = {
   checkPermissions,
   attachCookies,
   sendResetEmail,
-  tagImage
+  tagImage,
+  getExif,
+  uploadPhoto
 };

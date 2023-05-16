@@ -2,7 +2,6 @@ const cloudinary = require("cloudinary").v2;
 const fs = require("fs");
 const path = require("path");
 const { StatusCodes } = require("http-status-codes");
-const exifr = require("exifr");
 const { log } = require("console");
 const CustomError = require("../errors/index");
 const exifLib = require("fast-exif");
@@ -70,45 +69,38 @@ const uploadImage = async (req, res) => {
 
   // Optionally you can limit the size of images to 15mb
   const maxSize = 1024 * 1024 * 15;
-  const minSize = 1024 * 1024 * 3;
+  const minSize = 1024 * 1024 * 5;
   if (img.size > maxSize)
     // if (img.size > maxSize || img.size < minSize)
     throw new CustomError.BadRequestError(
       "Image must be greater than 3mb less than 15mb."
     );
+
+  // Getting exif data
+  const exifData = await utilFuncs.getExif(req.files.image.tempFilePath);
+
   // Uploading to cloudinary
   const result = await cloudinary.uploader.upload(
     req.files.image.tempFilePath,
     {
       use_filename: true,
-      folder: "file_upload",
+      folder: "albumin",
       categorization: "aws_rek_tagging",
       auto_tagging: 0.7,
     }
   );
-  // const exifData = await exifr.parse(req.files.image.tempFilePath);
-  const exifData = await exifLib.read(req.files.image.tempFilePath);
-  if (!exifData) {
-    // Removing the tempfiles
-    fs.unlinkSync(req.files.image.tempFilePath);
-    throw new CustomError.BadRequestError(
-      "Photo has no metadata. Please upload only photos taken from a camera."
-    );
-  }
+
+  // Destructuring result
   const {
     secure_url,
     height,
     width,
-    signature,
-    tags: taggs,
-    asset_id,
+    tags: taggs
   } = result;
   const tags = await utilFuncs.tagImage(secure_url);
 
-  const {
-    image: { Make, Model, Orientation },
-    exif: { LensModel },
-  } = exifData;
+  // Destructuring exifData
+  const { Make, Model, Orientation, LensModel } = exifData;
 
   // Removing the tempfiles
   fs.unlinkSync(req.files.image.tempFilePath);
@@ -117,9 +109,7 @@ const uploadImage = async (req, res) => {
     secure_url,
     height,
     width,
-    signature,
     taggs,
-    asset_id,
     Make,
     Model,
     Orientation,

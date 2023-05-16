@@ -59,6 +59,39 @@ const deleteUser = async (req, res) => {
   res.status(StatusCodes.OK).json({ message: "User removed successfully" });
 };
 
+const updateUserProfilePhoto = async (req, res) => {
+  // First check if theres a file in req.files. If not, throw an error
+  if (!req.files) {
+    throw new CustomError.BadRequestError("No file uploaded.");
+  }
+  // If there's a req.file, assign req.files.image to a variable
+  const img = req.files.image;
+  console.log(img);
+  // Check if the file format is an image by checking req.files.mimetype. If not, throw an error.
+  if (!img.mimetype.startsWith("image")) {
+    throw new CustomError.BadRequestError("Please upload an image.");
+  }
+
+  // Optionally you can limit the size of images to 5mb
+  const maxSize = 1024 * 1024 * 5;
+  const minSize = 1024 * 1024 * 0.3;
+  if (img.size > maxSize)
+    // if (img.size > maxSize || img.size < minSize)
+    throw new CustomError.BadRequestError(
+      "Image must be greater than 3mb less than 15mb."
+    );
+  const user = await User.findOne({ _id: req.user.userId });
+  if (!user) throw new CustomError.NotFoundError("User not found");
+  const profilePhoto = await utilFuncs.uploadPhoto(img.tempFilePath);
+  const { secure_url } = profilePhoto;
+  utilFuncs.checkPermissions(req.user, user._id);
+  user.profilePhoto = secure_url;
+  await user.save();
+  res
+    .status(StatusCodes.OK)
+    .json({ message: "User profile photo updated successfully." });
+};
+
 const follow = async (req, res) => {
   const { id: userId } = req.params;
   const user = await User.findOne({ _id: userId });
@@ -115,4 +148,5 @@ module.exports = {
   deleteUser,
   follow,
   unfollow,
+  updateUserProfilePhoto,
 };

@@ -50,7 +50,7 @@ const registerUser = async (req, res) => {
 
   res.status(StatusCodes.CREATED).json({
     user,
-    msg: "Please verify your account. A verification email has been sent to your email address.",
+    message: "Please verify your account. A verification email has been sent to your email address.",
   });
 };
 
@@ -89,7 +89,7 @@ const loginUser = async (req, res) => {
     refreshToken = existingToken.refreshToken;
 
     await utilFuncs.attachCookies(res, tokenUser, refreshToken);
-    res.status(StatusCodes.OK).json({ user, msg: "Successfully logged in." });
+    res.status(StatusCodes.OK).json({ user, message: "Successfully logged in." });
     return;
   }
   //
@@ -103,7 +103,7 @@ const loginUser = async (req, res) => {
   await Token.create(tokenObj);
 
   await utilFuncs.attachCookies(res, tokenUser, refreshToken);
-  res.status(StatusCodes.OK).json({ user, msg: "Successfully logged in." });
+  res.status(StatusCodes.OK).json({ user, message: "Successfully logged in." });
 };
 
 // Logout User
@@ -119,7 +119,7 @@ const logoutUser = async (req, res) => {
     httpOnly: true,
     expires: new Date(Date.now()),
   });
-  res.status(StatusCodes.OK).json({ msg: "user logged out!" });
+  res.status(StatusCodes.OK).json({ message: "user logged out!" });
 };
 
 // Verify Email
@@ -141,7 +141,7 @@ const verifyEmail = async (req, res) => {
   user.verificationToken = "";
   await user.save();
 
-  res.status(StatusCodes.OK).json({ msg: "User verified", user });
+  res.status(StatusCodes.OK).json({ message: "User verified", user });
 };
 
 // Forgot password
@@ -169,7 +169,7 @@ const forgotPassword = async (req, res) => {
     await user.save();
   }
 
-  res.status(StatusCodes.OK).json({ msg: "Success! Reset your password." });
+  res.status(StatusCodes.OK).json({ message: "Success! Reset your password." });
 };
 
 // Reset Password
@@ -195,19 +195,19 @@ const resetPassword = async (req, res) => {
 
   res
     .status(StatusCodes.OK)
-    .json({ msg: "Successfully changed password.", user });
+    .json({ message: "Successfully changed password.", user });
 };
 
 // const sendEmail = async (req, res) => {
 //     sgMail.setApiKey(process.env.BANANA_BANDIT_KEY)
-//     const msg = {
+//     const message = {
 //       to: "katoragashua@gmail.com", // Change to your recipient
 //       from: "katoragashua@outlook.com", // Change to your verified sender
 //       subject: "Sending with SendGrid is Fun",
 //       // text: "and easy to do anywhere, even with Node.js",
 //       html: "<strong>and easy to do anywhere, even with Node.js</strong>",
 //     };
-//     const info = await sgMail.send(msg);
+//     const info = await sgMail.send(message);
 //     // res.json(info);
 //     return info
 // }

@@ -4,7 +4,6 @@ const CustomError = require("../errors/index");
 
 const authenticateUser = async (req, res, next) => {
   const { accessToken, refreshToken } = req.signedCookies;
-  console.log(req.signedCookies);
 
   try {
     // If there's an accessToken, go to the next middleware function
@@ -28,7 +27,6 @@ const authenticateUser = async (req, res, next) => {
       user: payload.user.userId,
       refreshToken: payload.refreshToken,
     });
-    console.log(payload);
     if (!token || !token?.isValid) {
       throw new CustomError.UnauthorizedError("Authentication invalid");
     }

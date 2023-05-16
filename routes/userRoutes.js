@@ -13,6 +13,7 @@ const {
   deleteUser,
   follow,
   unfollow,
+  updateUserProfilePhoto
 } = require("../controllers/userControllers");
 
 router.get("/", authenticateUser, authorizePermissions("admin"), getAllUsers);
@@ -21,6 +22,7 @@ router.get(
   authenticateUser,
   getCurrentUser
 );
+router.patch("/update-profile-photo", authenticateUser, updateUserProfilePhoto)
 
 router.patch(
   "/:id/follow",

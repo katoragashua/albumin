@@ -60,6 +60,10 @@ const UserSchema = new Schema(
       ],
       lowercase: true,
     },
+    profilePhoto: {
+      type: String,
+      default: null,
+    },
     password: {
       type: String,
       required: [true, "Please enter a password."],

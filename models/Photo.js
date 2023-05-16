@@ -8,19 +8,22 @@ const LocationSchema = new Schema({
   lat: { type: Number },
 });
 
-// const CommentSchema = new Schema({
-//   user: { type: mongoose.Types.ObjectId, required: true },
-//   photo: { type: mongoose.Types.ObjectId, required: true },
-//   comment: { type: String, required: true },
-// });
-
-const LikeSchema = new Schema(
-  {
-    user: { type: mongoose.Types.ObjectId, ref: "User" },
-    photo: { type: mongoose.Types.ObjectId, ref: "Photo" },
+const ExifSchema = new Schema({
+  make: {
+    type: String,
+    default: null,
   },
-  { timestamps: true }
-);
+  model: { type: String, default: null },
+  lensModel: { type: String, default: null },
+});
+
+// const LikeSchema = new Schema(
+//   {
+//     user: { type: mongoose.Types.ObjectId, ref: "User" },
+//     photo: { type: mongoose.Types.ObjectId, ref: "Photo" },
+//   },
+//   { timestamps: true }
+// );
 
 const PhotoSchema = new Schema(
   {
@@ -38,12 +41,16 @@ const PhotoSchema = new Schema(
     location: {
       type: LocationSchema,
     },
-    tags: { type: [String]},
-    height: { type: Number },
-    width: { type: Number },
+    tags: { type: [String] },
+    height: { type: Number, default: null },
+    width: { type: Number, default: null },
     orientation: {
       type: String,
       enum: ["vertical", "horizontal", "squarish"],
+    },
+    exif: {
+      type: ExifSchema,
+      default: {},
     },
     user: {
       type: mongoose.Types.ObjectId,
