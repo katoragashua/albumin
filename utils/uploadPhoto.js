@@ -10,8 +10,6 @@ cloudinary.config({
   api_secret: process.env.API_SECRET,
 });
 
-
-// Upload using cloudinary
 const uploadPhoto = async (filePath) => {
 
   // Uploading to cloudinary

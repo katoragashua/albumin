@@ -44,8 +44,9 @@ const UserSchema = new Schema(
     username: {
       type: String,
       trim: true,
+      lowercase: true,
       minlength: 2,
-      maxlength: 30,
+      maxlength: 20,
     },
     email: {
       type: String,
@@ -111,9 +112,6 @@ const UserSchema = new Schema(
     },
     verified: {
       type: Date,
-    },
-    userImage: {
-      type: String,
     },
     passwordToken: {
       type: String,

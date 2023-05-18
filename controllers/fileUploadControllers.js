@@ -54,7 +54,6 @@ const uploadImage = async (req, res) => {
 };
 */
 
-// Upload using cloudinary
 const uploadImage = async (req, res) => {
   // First check if theres a file in req.files. If not, throw an error
   if (!req.files) {
@@ -76,47 +75,119 @@ const uploadImage = async (req, res) => {
       "Image must be greater than 3mb less than 15mb."
     );
 
+  // Use the path module to assign the image to a path you want it to be saved. As seen below.
+  const imgPath = path.resolve(__dirname, "../uploads", `${img.name}`);
+  await img.mv(imgPath);
   // Getting exif data
-  const exifData = await utilFuncs.getExif(req.files.image.tempFilePath);
+  const exifData = await utilFuncs.getExif(imgPath);
 
   // Uploading to cloudinary
-  const result = await cloudinary.uploader.upload(
-    req.files.image.tempFilePath,
-    {
-      use_filename: true,
-      folder: "albumin",
-      categorization: "aws_rek_tagging",
-      auto_tagging: 0.7,
-    }
-  );
+  const result = await cloudinary.uploader.upload(imgPath, {
+    use_filename: true,
+    folder: "albumin",
+  });
 
   // Destructuring result
-  const {
-    secure_url,
-    height,
-    width,
-    tags: taggs
-  } = result;
+  const { secure_url, height, width } = result;
   const tags = await utilFuncs.tagImage(secure_url);
 
   // Destructuring exifData
-  const { Make, Model, Orientation, LensModel } = exifData;
+  const {
+    Make: make,
+    Model: model,
+    Software: software,
+    LensModel: lensModel,
+  } = exifData;
+  let orientation;
+  let ratio = width / height;
 
+  if(ratio >= 0.8 && ratio <= 1.2) {
+    orientation = "squarish";
+  }else if((ratio < 0.8)) {
+    orientation = "portrait";
+  }else if(ratio > 1.2)  {
+    orientation = "landscape";
+  }
+  
   // Removing the tempfiles
-  fs.unlinkSync(req.files.image.tempFilePath);
+  fs.unlinkSync(imgPath);
 
   res.status(StatusCodes.OK).json({
     secure_url,
     height,
     width,
-    taggs,
-    Make,
-    Model,
-    Orientation,
-    LensModel,
+    make,
+    model,
+    software,
+    orientation,
+    lensModel,
     tags,
   });
 };
+
+// Upload using cloudinary
+// const uploadImage = async (req, res) => {
+//   // First check if theres a file in req.files. If not, throw an error
+//   if (!req.files) {
+//     throw new CustomError.BadRequestError("No file uploaded.");
+//   }
+//   // If there's a req.file, assign req.files.image to a variable
+//   const img = req.files.image;
+//   // Check if the file format is an image by checking req.files.mimetype. If not, throw an error.
+//   if (!img.mimetype.startsWith("image")) {
+//     throw new CustomError.BadRequestError("Please upload an image.");
+//   }
+
+//   // Optionally you can limit the size of images to 15mb
+//   const maxSize = 1024 * 1024 * 15;
+//   const minSize = 1024 * 1024 * 5;
+//   if (img.size > maxSize)
+//     // if (img.size > maxSize || img.size < minSize)
+//     throw new CustomError.BadRequestError(
+//       "Image must be greater than 3mb less than 15mb."
+//     );
+
+//   // Getting exif data
+//   const exifData = await utilFuncs.getExif(img.tempFilePath);
+
+//   // Uploading to cloudinary
+//   const result = await cloudinary.uploader.upload(
+//     img.tempFilePath,
+//     {
+//       use_filename: true,
+//       folder: "albumin",
+//       categorization: "aws_rek_tagging",
+//       auto_tagging: 0.7,
+//     }
+//   );
+
+//   // Destructuring result
+//   const {
+//     secure_url,
+//     height,
+//     width,
+//     tags: taggs
+//   } = result;
+//   const tags = await utilFuncs.tagImage(secure_url);
+
+//   // Destructuring exifData
+//   const { Make, Model, Orientation, LensModel } = exifData;
+
+//   // Removing the tempfiles
+//   fs.unlinkSync(img.tempFilePath);
+
+//   res.status(StatusCodes.OK).json({
+//     secure_url,
+//     height,
+//     width,
+//     taggs,
+//     Make,
+//     Model,
+//     Orientation,
+//     LensModel,
+//     tags,
+//   });
+// };
 
 module.exports = {
   uploadImage,

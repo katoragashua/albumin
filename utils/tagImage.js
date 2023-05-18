@@ -23,10 +23,8 @@ const fetch = require("node-fetch");
 //   }
 // };
 
-const tagImage = async (req, res) => {
+const tagImage = async (image) => {
   let tags = [];
-  const image =
-    "https://ik.imagekit.io/vjugbonpd/image_xeG7P_Den?updatedAt=1683119703523";
   const url =
     "https://api.imagga.com/v2/tags?image_url=" + encodeURIComponent(image);
   try {
@@ -42,7 +40,7 @@ const tagImage = async (req, res) => {
     tags = [
       ...data.result.tags.reduce((acc, cur) => {
         const { confidence, tag } = cur;
-        if (confidence > 13) {
+        if (confidence > 15) {
           acc.push(tag.en);
         }
         return acc;

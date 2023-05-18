@@ -6,17 +6,16 @@ const getExif = async (filePath) => {
   /*Getting exif Data */
   // const exifData = await exifr.parse(req.files.image.tempFilePath);
   const exifData = await exifLib.read(filePath);
-  if (!exifData) {
+  const {
+    image: { Make, Model, Software },
+    exif: { LensModel },
+  } = exifData;
+  if (!Make || !Model) {
     throw new CustomError.BadRequestError(
       "Photo has no metadata. Please upload only photos taken from a camera."
     );
   }
-
-  const {
-    image: { Make, Model, Orientation },
-    exif: { LensModel },
-  } = exifData;
-  return { Make, Model, Orientation, LensModel };
+  return { Make, Model, Software, LensModel };
 };
 
 module.exports = getExif;

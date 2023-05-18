@@ -46,13 +46,11 @@ const getUserPhotos = async (req, res) => {
 
 // Get All Photos
 const getAllPhotos = async (req, res) => {
-  const photos = await Photo.find({})
-    .sort("-createdAt")
-    .populate({
-      path: "user",
-      select:
-        "name firstName, lastName, username, email, availableForWork, userImage, location, social",
-    });
+  const photos = await Photo.find({}).sort("-createdAt").populate({
+    path: "user",
+    select:
+      "name firstName, lastName, username, email, availableForWork, userImage, location, social",
+  });
   res
     .status(StatusCodes.OK)
     .json({ message: "Success", results: photos, count: photos.length });
@@ -77,11 +75,16 @@ const getSinglePhoto = async (req, res) => {
 // Update Photo
 const updatePhoto = async (req, res) => {
   const { id: photoId } = req.params;
+  const { description, tags, city, country } = req.body;
   const photo = await Photo.findOne({ _id: photoId, user: req.user.userId });
   if (!photo) {
     throw new CustomError.NotFoundError("Photo was not found");
   }
   utilFuncs.checkPermissions(req.user, photo.user);
+  photo.description = description;
+  photo.tags = tags;
+  photo.city = city;
+  photo.country = country;
   
   res.status(StatusCodes.OK).json({ message: "Success", photo });
 };
