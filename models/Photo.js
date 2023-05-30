@@ -34,7 +34,7 @@ const PhotoSchema = new Schema(
     },
     description: {
       type: String,
-      required: [true, "Please enter a decription"],
+      required: [true, "Please enter a description"],
       maxlength: 200,
       trim: true,
     },

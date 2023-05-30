@@ -90,6 +90,7 @@ const uploadImage = async (req, res) => {
   // Destructuring result
   const { secure_url, height, width } = result;
   const tags = await utilFuncs.tagImage(secure_url);
+  
 
   // Destructuring exifData
   const {

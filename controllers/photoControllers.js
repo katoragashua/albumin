@@ -4,7 +4,8 @@ const CustomError = require("../errors/index");
 const utilFuncs = require("../utils/index");
 const User = require("../models/User");
 const Comment = require("../models/Comment");
-
+// List/Array of stop words
+const stopWords = ["the", "and", "a", "an", "in", "is", "it"];
 /*
 // PHOTOS 
 */
@@ -38,15 +39,105 @@ const createPhoto = async (req, res) => {
 
 // Get User Photos
 const getUserPhotos = async (req, res) => {
-  const photos = await Photo.find({ user: req.user.userId });
+  const photos = await Photo.find({ user: req.user.userId }).populate({
+    path: "user",
+    select:
+      "name firstName, lastName, username, email, availableForWork, userImage, location, social",
+  });
   res
     .status(StatusCodes.OK)
     .json({ message: "Success", results: photos, count: photos.length });
 };
 
+// Search Photos
+const searchPhotos = async (req, res) => {
+  const { orientation, sort, select } = req.query;
+  const queryObj = {};
+  if (orientation) queryObj.orientation = orientation;
+  if (sort) {
+    let sorted = sort.split(",").join(" ");
+  }
+
+  if (select) {
+    let selected = select.split(",").join(" ");
+  }
+  const { search } = req.params;
+  if (!search) {
+    const photos = await Photo.find({}).sort("createdAt");
+    return res
+      .status(StatusCodes.OK)
+      .json({ message: "Success", photos, count: photos.length })
+      .populate({
+        path: "user",
+        select:
+          "name firstName, lastName, username, email, availableForWork, userImage, location, social",
+      });
+  }
+
+  let searchQuery =
+    search
+      .toLowerCase()
+      .replace(/[^\w\s]/gi, "")
+      .trim() || " ";
+  // .split(",")
+  // .filter((n) => !stopWords.includes(n))
+  // .filter(Boolean);
+  console.log(searchQuery);
+
+  // // Using Promise.all()
+  // const allPhotos = searchQuery.map((n) => {
+  //   return Photo.find({ tags: n, user: userId });
+  // });
+  // const photos = await (await Promise.all(allPhotos)).filter(Boolean);
+  // Using mongoDB query operators
+  const photos = await Photo.find({ tags: { $in: searchQuery } })
+    .sort("createdAt")
+    .populate({
+      path: "user",
+      select:
+        "name firstName, lastName, username, email, availableForWork, userImage, location, social",
+    });
+  res
+    .status(StatusCodes.OK)
+    .json({ message: "Success", photos, count: photos.length });
+};
+
 // Get All Photos
 const getAllPhotos = async (req, res) => {
-  const photos = await Photo.find({}).sort("-createdAt").populate({
+  const { query, orientation, sort, select } = req.query;
+
+  const queryObj = {};
+  if (query) {
+    let searchQuery = query
+      .toLowerCase()
+      .replace(/[^\w\s]/gi, "")
+      .trim()
+      .split(",")
+      .filter((n) => !stopWords.includes(n))
+      .filter(Boolean);
+    queryObj.tags = { $in: searchQuery };
+  }
+
+  if (orientation) queryObj.orientation = orientation;
+
+  let result = Photo.find(queryObj);
+  if (sort) {
+    let sorted = sort.split(",").join(" ");
+    result = result.sort(sorted);
+  }
+
+  if (select) {
+    let selected = select.split(",").join(" ");
+    result = result.select(selected);
+  }
+
+  const perPage = +req.query.per_page || 30;
+  const page = +req.query.page || 1;
+  const skip = (page - 1) * perPage;
+
+  result = result.skip(skip).limit(perPage);
+
+  const photos = await result.populate({
     path: "user",
     select:
       "name firstName, lastName, username, email, availableForWork, userImage, location, social",
@@ -81,11 +172,11 @@ const updatePhoto = async (req, res) => {
     throw new CustomError.NotFoundError("Photo was not found");
   }
   utilFuncs.checkPermissions(req.user, photo.user);
-  photo.description = description;
+  photo.description = description || photo.description;
   photo.tags = tags;
   photo.city = city;
   photo.country = country;
-  
+  await photo.save();
   res.status(StatusCodes.OK).json({ message: "Success", photo });
 };
 
@@ -164,6 +255,7 @@ module.exports = {
   likeAndUnlikePhoto,
   saveAndUnsavePhoto,
   downloadPhoto,
+  searchPhotos,
 };
 
 // const likePhoto = async (req, res) => {

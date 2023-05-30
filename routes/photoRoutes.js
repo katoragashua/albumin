@@ -15,9 +15,11 @@ const {
   deletePhoto,
   likeAndUnlikePhoto,
   saveAndUnsavePhoto,
-  downloadPhoto
+  downloadPhoto,
+  searchPhotos,
 } = require("../controllers/photoControllers");
 
+router.get("/search/:search", authenticateUser, searchPhotos);
 router.post("/", authenticateUser, createPhoto);
 router.get("/", authenticateUser, getAllPhotos);
 router.get("/:id", authenticateUser, getSinglePhoto);

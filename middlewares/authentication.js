@@ -12,7 +12,6 @@ const authenticateUser = async (req, res, next) => {
         accessToken,
         process.env.JWT_SECRET
       );
-      console.log(payload);
       req.user = payload;
       // Return is necessary else the code will continue reading
       return next();

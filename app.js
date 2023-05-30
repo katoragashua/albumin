@@ -4,6 +4,10 @@ require("express-async-errors");
 const app = express();
 const { config } = require("dotenv");
 config();
+const {
+  searchPhotos,
+  getAllPhotos,
+} = require("./controllers/photoControllers");
 
 const morgan = require("morgan");
 const cors = require("cors");
@@ -36,7 +40,7 @@ const { uploadImage } = require("./controllers/fileUploadControllers");
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.API_KEY,
-  api_secret: process.env.API_SECRET
+  api_secret: process.env.API_SECRET,
 });
 
 // Use external packages
@@ -46,7 +50,7 @@ app.use(morgan("tiny"));
 app.use(express.json());
 // app.use(express.urlencoded({ extended: true}))
 app.use(fileUpload({ useTempFiles: true }));
-app.use(cors())
+app.use(cors());
 
 // Use Routers
 app.use("/api/v1/users", userRouter);
@@ -54,6 +58,8 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/photos", photoRouter);
 app.use("/api/v1/comments", commentRouter);
 app.post("/api/v1/upload-image", authenticateUser, uploadImage);
+app.get("/api/v1/images/search/:search?", searchPhotos);
+app.all("*", getAllPhotos);
 
 app.get("/", (req, res) => {
   res.send("<h1>Lens App.</h1>");
