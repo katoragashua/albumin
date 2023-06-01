@@ -57,7 +57,7 @@ const PhotoSchema = new Schema(
       ref: "User",
     },
     likes: { type: [mongoose.Types.ObjectId] },
-    downloads: { type: [mongoose.Types.ObjectId] },
+    downloads: { type: Number, default: 0 },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );

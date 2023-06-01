@@ -6,7 +6,7 @@ const { config } = require("dotenv");
 config();
 const {
   searchPhotos,
-  getAllPhotos,
+  getFollowingPhotos,
 } = require("./controllers/photoControllers");
 
 const morgan = require("morgan");
@@ -59,7 +59,7 @@ app.use("/api/v1/photos", photoRouter);
 app.use("/api/v1/comments", commentRouter);
 app.post("/api/v1/upload-image", authenticateUser, uploadImage);
 app.get("/api/v1/images/search/:search?", searchPhotos);
-app.all("*", getAllPhotos);
+app.get("/api/v1/following",authenticateUser, getFollowingPhotos);
 
 app.get("/", (req, res) => {
   res.send("<h1>Lens App.</h1>");

@@ -52,51 +52,66 @@ const getUserPhotos = async (req, res) => {
 // Search Photos
 const searchPhotos = async (req, res) => {
   const { orientation, sort, select } = req.query;
+  const { search } = req.params;
+  let searchQuery;
   const queryObj = {};
+  if (search) {
+    searchQuery =
+      search
+        .toLowerCase()
+        .replace(/[^\w\s]/gi, "")
+        .trim() || "";
+    // .split(",")
+    // .filter((n) => !stopWords.includes(n))
+    // .filter(Boolean);
+    //  Using Promise.all()
+    // const allPhotos = searchQuery.map((n) => {
+    //   return Photo.find({ tags: n, user: userId });
+    // });
+    // const photos = await (await Promise.all(allPhotos)).filter(Boolean);
+    // // Using mongoDB query operators
+    queryObj.tags = { $in: searchQuery };
+  }
+
   if (orientation) queryObj.orientation = orientation;
+
+  let result = Photo.find(queryObj);
+
   if (sort) {
     let sorted = sort.split(",").join(" ");
+    result = result.sort(sorted);
+  } else {
+    result = result.sort("createdAt");
   }
-
   if (select) {
     let selected = select.split(",").join(" ");
-  }
-  const { search } = req.params;
-  if (!search) {
-    const photos = await Photo.find({}).sort("createdAt");
-    return res
-      .status(StatusCodes.OK)
-      .json({ message: "Success", photos, count: photos.length })
-      .populate({
-        path: "user",
-        select:
-          "name firstName, lastName, username, email, availableForWork, userImage, location, social",
-      });
+    result = result.select(selected);
   }
 
-  let searchQuery =
-    search
-      .toLowerCase()
-      .replace(/[^\w\s]/gi, "")
-      .trim() || " ";
-  // .split(",")
-  // .filter((n) => !stopWords.includes(n))
-  // .filter(Boolean);
-  console.log(searchQuery);
+  const perPage = +req.query.per_page || 30;
+  const page = +req.query.page || 1;
+  const skip = (page - 1) * perPage;
 
-  // // Using Promise.all()
-  // const allPhotos = searchQuery.map((n) => {
-  //   return Photo.find({ tags: n, user: userId });
-  // });
-  // const photos = await (await Promise.all(allPhotos)).filter(Boolean);
-  // Using mongoDB query operators
-  const photos = await Photo.find({ tags: { $in: searchQuery } })
-    .sort("createdAt")
-    .populate({
+  result = result.skip(skip).limit(perPage);
+
+  console.log(queryObj);
+
+  if (!searchQuery) {
+    const photos = await result.populate({
       path: "user",
       select:
         "name firstName, lastName, username, email, availableForWork, userImage, location, social",
     });
+    return res
+      .status(StatusCodes.OK)
+      .json({ message: "Success", photos, count: photos.length });
+  }
+
+  const photos = await result.populate({
+    path: "user",
+    select:
+      "name firstName, lastName, username, email, availableForWork, userImage, location, social",
+  });
   res
     .status(StatusCodes.OK)
     .json({ message: "Success", photos, count: photos.length });
@@ -145,6 +160,37 @@ const getAllPhotos = async (req, res) => {
   res
     .status(StatusCodes.OK)
     .json({ message: "Success", results: photos, count: photos.length });
+};
+
+// Get following Photos
+const getFollowingPhotos = async (req, res) => {
+  const user = await User.findOne({ _id: req.user.userId });
+  if (!user.following.length) {
+    return res
+      .status(StatusCodes.OK)
+      .json({ message: "You haven't followed anyone yet", photos: [] });
+  }
+
+
+  // // Using Promise.all()
+  // let photos = await Promise.all(user.following.map((userId) => {
+  //   return Photo.find({ user: userId }).populate({
+  //     path: "user",
+  //     select:
+  //       "name firstName, lastName, username, email, availableForWork, userImage, location, social",
+  //   });;
+  // }));
+
+  // photos = photos.reduce((acc, cur) => acc.concat(cur), []);
+
+  let photos = await Photo.find({ user: { $in: user.following } })
+    .sort("createdAt")
+    .populate({
+      path: "user",
+      select:
+        "name firstName, lastName, username, email, availableForWork, userImage, location, social",
+    });
+  res.status(StatusCodes.OK).json({ message: "Success", photos });
 };
 
 // Get Single Photos
@@ -256,6 +302,7 @@ module.exports = {
   saveAndUnsavePhoto,
   downloadPhoto,
   searchPhotos,
+  getFollowingPhotos,
 };
 
 // const likePhoto = async (req, res) => {
