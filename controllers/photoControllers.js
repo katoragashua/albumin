@@ -172,9 +172,9 @@ const getFollowingPhotos = async (req, res) => {
   }
 
 
-  // // Using Promise.all()
-  // let photos = await Promise.all(user.following.map((userId) => {
-  //   return Photo.find({ user: userId }).populate({
+  // Using Promise.all(). Alternatively you can use Promise.allSettled()
+  // let photos = await Promise.all(user.following.map(async(userId) => {
+  //   return await Photo.find({ user: userId }).populate({
   //     path: "user",
   //     select:
   //       "name firstName, lastName, username, email, availableForWork, userImage, location, social",

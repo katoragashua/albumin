@@ -21,22 +21,16 @@ const SocialSchema = new Schema({
 // Create a UserSchema
 const UserSchema = new Schema(
   {
-    name: {
+    firstname: {
       type: String,
-      required: [true, "Please enter a name."],
+      required: [true, "Please enter lastname"],
       trim: true,
       minlength: 2,
       maxlength: 30,
     },
-
-    firstName: {
+    lastname: {
       type: String,
-      trim: true,
-      minlength: 2,
-      maxlength: 30,
-    },
-    lastName: {
-      type: String,
+      required: [true, "Please enter lastname."],
       trim: true,
       minlength: 2,
       maxlength: 30,
@@ -44,9 +38,16 @@ const UserSchema = new Schema(
     username: {
       type: String,
       trim: true,
-      lowercase: true,
+      required: true,
+      unique: true,
       minlength: 2,
       maxlength: 20,
+      validate: {
+        validator: function (v) {
+          return /^\S*$/.test(v);
+        },
+        message: "Username cannot contain spaces",
+      },
     },
     email: {
       type: String,

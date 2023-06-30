@@ -20,7 +20,7 @@ const comparePasswords = async (password, userPassword) => {
 
 // Register users
 const registerUser = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { firstname, lastname, username, email, password } = req.body;
   // Besides the unique property in the schema we want to check if a user with that email exists already
   const emailAlreadyExists = await User.findOne({ email });
   if (emailAlreadyExists) {
@@ -33,7 +33,9 @@ const registerUser = async (req, res) => {
   const verificationToken = crypto.randomBytes(40).toString("hex");
 
   const user = await User.create({
-    name,
+    firstname,
+    lastname,
+    username,
     email,
     password,
     role,
@@ -42,7 +44,7 @@ const registerUser = async (req, res) => {
 
   const origin = "http://localhost:5000";
   await utilFuncs.sendVerificationEmail({
-    name: user.name,
+    firstname: user.firstname,
     email: user.email,
     verificationToken: user.verificationToken,
     origin: origin,
@@ -50,7 +52,8 @@ const registerUser = async (req, res) => {
 
   res.status(StatusCodes.CREATED).json({
     user,
-    message: "Please verify your account. A verification email has been sent to your email address.",
+    message:
+      "Please verify your account. A verification email has been sent to your email address.",
   });
 };
 
@@ -61,11 +64,11 @@ const loginUser = async (req, res) => {
 
   if (!email || !password) {
     throw new CustomError.BadRequestError(
-      "Please provide a valid email address and password"
+      "Please provide email and password."
     );
   }
   // Check if user exists
-  const user = await User.findOne({ email: email });
+  const user = await User.findOne({ email: email }) || await User.findOne({username: email});
   if (!user) {
     throw new CustomError.NotFoundError("User not found");
   }
@@ -79,7 +82,7 @@ const loginUser = async (req, res) => {
 
   let refreshToken = "";
   // check if user has existing token in db/ This helps so we don't have to create multiple tokens for one user
-  // Since we don't want to keep creating token documents on every login. We can check if a token exists already where the user property is set to the users _id property (user._id). If it does, we check if the existingToken' isValid property is set to true and set the refresh token declared above to the existingToken.refreshToken. Else we throw an error if the existingToken' isValid property is set to false
+  // Since we don't want to keep creating token documents on every login. We can check if a token exists already where the user property is set to the users _id property (user._id). If it does, we check if the existingToken' isValid property is set to true and set the refresh token declared above to the existingToken. Else we throw an error if the existingToken' isValid property is set to false
   const existingToken = await Token.findOne({ user: user._id });
   if (existingToken) {
     const { isValid } = existingToken;
@@ -89,7 +92,9 @@ const loginUser = async (req, res) => {
     refreshToken = existingToken.refreshToken;
 
     await utilFuncs.attachCookies(res, tokenUser, refreshToken);
-    res.status(StatusCodes.OK).json({ user, message: "Successfully logged in." });
+    res
+      .status(StatusCodes.OK)
+      .json({ user, message: "Successfully logged in." });
     return;
   }
   //
@@ -156,7 +161,7 @@ const forgotPassword = async (req, res) => {
     const passwordToken = crypto.randomBytes(40).toString("hex");
 
     await utilFuncs.sendResetEmail({
-      name: user.name,
+      firstname: user.firstname,
       email: user.email,
       passwordToken,
       origin,
@@ -169,7 +174,7 @@ const forgotPassword = async (req, res) => {
     await user.save();
   }
 
-  res.status(StatusCodes.OK).json({ message: "Success! Reset your password." });
+  res.status(StatusCodes.OK).json({ message: "Success! A reset link has been sent to your email." });
 };
 
 // Reset Password
