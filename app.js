@@ -62,7 +62,7 @@ app.get("/api/v1/images/search/:search?", searchPhotos);
 app.get("/api/v1/following",authenticateUser, getFollowingPhotos);
 
 app.get("/", (req, res) => {
-  res.send("<h1>Lens App.</h1>");
+  res.send(`<h1>Lens App.</h1>`);
 });
 
 app.use(notFound);

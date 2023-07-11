@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  /* outline: solid green 2px; */
+  box-sizing: border-box;
+}
+:root {
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+a {
+  text-decoration: none;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  font-size: 3em;
+  line-height: 1.1;
+}
+
+h2 {
+  font-size: 2em;
+  line-height: 1.1;
+}
+
+h3 {
+  font-size: 1.5em;
+  line-height: 1.1;
+}
+
+h4 {
+  font-size: 1.2em;
+  line-height: 1.1;
+}
+
+.container {
+  max-width: 95%;
+  margin: 0 auto;
+}
+
+.search-input {
+  background-image: url("./assets/images/search-line.svg");
+  background-repeat: no-repeat;
+  background-size: 20px;
+  background-position: 1rem center;
+}
+
+.icons {
+  width: 20px;
+}
+
+.photos {
+  grid-template-rows: masonry;
+}
+
+.hero {
+  background-image: url("./assets/images/hero.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  /* background-attachment: fixed; */
+}
+.hero-text {
+  text-shadow: 1px 1px 2px black;
+}
+
+.sticky {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background-color: white;
+}
+
+.logo {
+  aspect-ratio: 6/4;
+  width: 120px;
+}
+
+.my-masonry-grid {
+  display: -webkit-box; /* Not needed if autoprefixing */
+  display: -ms-flexbox; /* Not needed if autoprefixing */
+  display: flex;
+  margin-left: -20px; /* gutter size offset */
+  width: auto;
+}
+.my-masonry-grid_column {
+  padding-left: 20px; /* gutter size */
+  background-clip: padding-box;
+}
+
+/* Style your items */
+.my-masonry-grid_column > div { /* change div to reference your elements you put in <Masonry> */
+  background: grey;
+  margin-bottom: 20px;
+}
+
+.inputs {
+  @apply rounded-md outline-none px-4 py-2 bg-slate-100
+}
+.flex-column {
+  @apply flex flex-col
+}
